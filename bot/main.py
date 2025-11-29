@@ -7,26 +7,16 @@ from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.client.default import DefaultBotProperties
 
 from src.utils.config import settings
-from src.db.db import reset_tables, create_tables
 from src.handlers import main_router
+from src.utils.argparser import add_args
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 async def main():
     session = AiohttpSession()
-    parser = argparse.ArgumentParser()
 
-    parser.add_argument('--create_tables', action='store_true')
-    parser.add_argument('--reset_tables', action='store_true')
-
-    args = parser.parse_args()
-
-    if args.create_tables:
-        await create_tables()
-
-    if args.reset_tables:
-        await reset_tables()
+    await add_args()
 
     bot = Bot(
         token=settings.TOKEN,

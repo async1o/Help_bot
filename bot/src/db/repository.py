@@ -9,7 +9,6 @@ from src.schemas.users import UserSchema
 logger = logging.getLogger('Repositories')
 
 class UserRepository:
-
     async def get_user_by_id(self, user_id: str):
         async with async_session_maker() as session:
 
@@ -24,7 +23,6 @@ class UserRepository:
 
             if await self.get_user_by_id(user.user_id):
                 return
-            
             
             stmt = insert(UserModel).values(user.model_dump())
             logger.info(msg='User added to DB')
