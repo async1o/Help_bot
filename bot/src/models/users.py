@@ -3,6 +3,7 @@ from typing import Union
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.db.db import Base
+from src.schemas.users import UserSchema
 
 class UserModel(Base):
     __tablename__ = 'users'
