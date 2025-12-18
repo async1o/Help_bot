@@ -1,13 +1,18 @@
+import logging
+
 from aiogram import Router, F
-from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
-from src.db.repository import UserRepository
+from src.db.repositories import UserRepository, AdminRepository
 from src.schemas.users import UserSchema
 from src.states.sos_states import SosStates
 from src.keyboards.sos import confirmation_kb, cancel_message, all_right_message
+from src.methods.choose_operator import choose_operator
 
 router = Router()
+
+logger = logging.getLogger('UsersHandlers')
 
 @router.message(F.text == '/start')
 async def start(message: Message, state: FSMContext):
@@ -17,8 +22,13 @@ async def start(message: Message, state: FSMContext):
                              is_admin=False)
     
     await UserRepository().add_user(user_schema)
-    await message.answer(text=f'Здравствуйте {message.from_user.full_name}\nПодробно опишите вашу проблему')
+    await message.answer(text=f'Здравствуйте {message.from_user.full_name}\nЕсли хотите задать вопрос напишите <b>/sos</b>')
+
+@router.message(F.text == '/sos')
+async def start_sos(message: Message, state: FSMContext):
+    await message.answer(text='Подробно опишите вашу проблему')
     await state.set_state(SosStates.confirmation)
+
 
 @router.message(F.text == '/id')
 async def get_id(message: Message):
@@ -46,14 +56,20 @@ async def cancel_answer(message: Message, state: FSMContext):
 @router.message(F.text == all_right_message, SosStates.sumbit)
 async def apply_answer(message: Message, state: FSMContext):
     try:
-        ...
-
+        await choose_operator(bot=message.bot, request=await state.get_data())
         await message.answer(text='Запрос отправлен!', reply_markup=ReplyKeyboardRemove())
 
-    except:
+    except Exception as e:
+        logger.error(msg=e)
         await message.answer(text='Что-то пошло не так', reply_markup=ReplyKeyboardRemove())
 
     finally:
         await state.clear()
+
+@router.callback_query(F.data == 'start_dialog')
+async def start_dialog(callback: CallbackQuery, state: FSMContext):
+    operators = await AdminRepository().get_all_operators()
+    for operator in operators:
+        await callback.bot.delete_message(chat_id=operator[0], message_id=1)
 
 

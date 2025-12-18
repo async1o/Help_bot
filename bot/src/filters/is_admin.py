@@ -1,7 +1,7 @@
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
 
-from src.db.repository import UserRepository
+from src.db.repositories import UserRepository
 
 class IsAdmin(BaseFilter):
     async def __call__(self, message: Message):
