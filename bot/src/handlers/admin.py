@@ -14,6 +14,13 @@ router.message.filter(IsAdmin())
 logger = logging.getLogger('AdminsHandler')
 
 class Admins:
+    @router.message(F.text == '/admin')
+    async def admin_info(message: Message):
+        text = '<b>/add_admin</b> - Добавляет нового администратор\n<b>/delete_admin</b> - Удаляет администратора\n<b>/add_operator</b> - Добавляет нового оператора\n<b>/delete_operator</b> - Удаляет оператора'
+        
+        await message.answer(text=f'Команда для админов:\n{text}')
+
+
     @router.message(F.text == '/add_admin')
     async def add_admin(message: Message, state: FSMContext):
         await message.answer(text='Введите ID нового администратора')

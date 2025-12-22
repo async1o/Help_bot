@@ -22,9 +22,6 @@ class UserRepository:
 
     async def add_user(self, user: UserSchema):
         async with async_session_maker() as session:
-
-
-
             if await self.get_user_by_id(user.user_id):
                 return
             
@@ -45,6 +42,26 @@ class AdminRepository:
                 )
             )
         logger.info(msg='Admins added to DB')
+    
+    async def get_admins(self):
+        async with async_session_maker() as session:
+
+
+            stmt = select(UserModel.user_id).where(UserModel.is_admin == True)
+
+            res = await session.execute(stmt)
+
+            return res.all()
+        
+    async def get_operators(self):
+        async with async_session_maker() as session:
+
+
+            stmt = select(UserModel).where(UserModel.is_operator == True)
+
+            res = await session.execute(stmt)
+
+            return res.all()
 
     async def update_roles(self, user_id: str, add: bool, operator: bool):
         async with async_session_maker() as session:
