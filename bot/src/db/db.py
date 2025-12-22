@@ -17,7 +17,7 @@ class Base(DeclarativeBase):
 
 
 async def create_tables():
-    from src.db.repository import AdminRepository
+    from bot.src.db.repositories import AdminRepository
 
     async with engine.begin() as eng:
         await eng.run_sync(Base.metadata.create_all) 

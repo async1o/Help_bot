@@ -1,4 +1,5 @@
 import logging
+from typing import List
 
 from sqlalchemy import insert, select, update
 
@@ -75,4 +76,10 @@ class AdminRepository:
             await session.execute(stmt)
             await session.commit()
 
-        
+    async def get_all_operators(self):
+        async with async_session_maker() as session:
+            stmt = select(UserModel.user_id).where(UserModel.is_operator == True)
+            res = (await session.execute(stmt)).all()
+            return res
+
+
