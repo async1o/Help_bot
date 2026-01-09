@@ -15,13 +15,14 @@ logger = logging.getLogger('AdminsHandler')
 
 class Admins:
     @router.message(F.text == '/admin')
-    async def admin_panel(message: Message, state: FSMContext):
+    async def admin_panel(message: Message):
         text = '<b>/add_admin</b> - Назначает нового администратора\n' \
             '<b>/delete_admin</b> - Удаляет администратора\n' \
             '<b>/add_operator</b> - Назначает нового оператора\n' \
             '<b>/delete_operator</b> - Удаляет оператора'
 
         await message.answer(text=text)
+        
     @router.message(F.text == '/add_admin')
     async def add_admin(message: Message, state: FSMContext):
         await message.answer(text='Введите ID нового администратора')

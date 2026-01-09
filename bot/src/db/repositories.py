@@ -1,11 +1,13 @@
 import logging
 from typing import List
 
-from sqlalchemy import insert, select, update
+from sqlalchemy import insert, select, update, delete
 
 from src.db.db import async_session_maker
 from src.models.users import UserModel
+from src.models.messages import MsgModel
 from src.schemas.users import UserSchema
+from src.schemas.messages import MsgSchema
 from src.utils.config import settings
 
 logger = logging.getLogger('Repositories')
@@ -23,14 +25,16 @@ class UserRepository:
 
     async def add_user(self, user: UserSchema):
         async with async_session_maker() as session:
-            if await self.get_user_by_id(user.user_id):
-                return
             
             stmt = insert(UserModel).values(user.model_dump())
-            logger.info(msg='User added to DB')
             
-            await session.execute(stmt)
-            await session.commit()
+            
+            try:
+                await session.execute(stmt)
+                await session.commit()
+                logger.info(msg='User added to DB')
+            except:
+                pass
     
 class AdminRepository:
     async def add_start_admins(self):
@@ -46,23 +50,12 @@ class AdminRepository:
     
     async def get_admins(self):
         async with async_session_maker() as session:
-
-
             stmt = select(UserModel.user_id).where(UserModel.is_admin == True)
 
             res = await session.execute(stmt)
 
             return res.all()
-        
-    async def get_operators(self):
-        async with async_session_maker() as session:
 
-
-            stmt = select(UserModel).where(UserModel.is_operator == True)
-
-            res = await session.execute(stmt)
-
-            return res.all()
 
     async def update_roles(self, user_id: str, add: bool, operator: bool):
         async with async_session_maker() as session:
@@ -82,4 +75,28 @@ class AdminRepository:
             res = (await session.execute(stmt)).all()
             return res
 
+class MsgRepository:
+    async def add_message(self, message: MsgSchema):
+        async with async_session_maker() as session:
+            stmt = insert(MsgModel).values(message.model_dump())
+
+            logger.info(msg='Message added to DB')
+
+            await session.execute(stmt)
+            await session.commit()
+
+    async def get_message(self, text: str):
+        async with async_session_maker() as session:
+            stmt = select(MsgModel).where(MsgModel.text == text)
+
+            msg = await session.execute(stmt)
+
+            return msg.fetchall()
+    
+    async def delete_message(self, text: str):
+        async with async_session_maker() as session:
+            stmt = delete(MsgModel).where(MsgModel.text == text)
+
+            await session.execute(stmt)
+            await session.commit()
 

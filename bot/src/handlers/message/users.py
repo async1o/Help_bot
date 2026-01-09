@@ -15,7 +15,7 @@ router = Router()
 logger = logging.getLogger('UsersHandlers')
 
 @router.message(F.text == '/start')
-async def start(message: Message, state: FSMContext):
+async def start(message: Message):
     user_schema = UserSchema(user_id=str(message.from_user.id),
                              full_name=message.from_user.full_name,
                              is_operator=False,
@@ -56,7 +56,8 @@ async def cancel_answer(message: Message, state: FSMContext):
 @router.message(F.text == all_right_message, SosStates.sumbit)
 async def apply_answer(message: Message, state: FSMContext):
     try:
-        await choose_operator(bot=message.bot, request=await state.get_data())
+        await choose_operator(bot=message.bot, request=await state.get_data(), sender_id=message.from_user.id)
+        
         await message.answer(text='Запрос отправлен!', reply_markup=ReplyKeyboardRemove())
 
     except Exception as e:
@@ -66,10 +67,5 @@ async def apply_answer(message: Message, state: FSMContext):
     finally:
         await state.clear()
 
-@router.callback_query(F.data == 'start_dialog')
-async def start_dialog(callback: CallbackQuery, state: FSMContext):
-    operators = await AdminRepository().get_all_operators()
-    for operator in operators:
-        await callback.bot.delete_message(chat_id=operator[0], message_id=1)
 
 
